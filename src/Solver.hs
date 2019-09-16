@@ -31,21 +31,22 @@ instance Monad f => Alternative (SolverT s f) where
     empty = SolverT
         [(Set.singleton Set.empty, Void.absurd . flip unModel k) | k <- newKey]
     SolverT a <|> SolverT b = SolverT
-        [((Set.insert . Set.singleton) (CB False k') aCs `disjoinConstraints`
-          (Set.insert . Set.singleton) (CB True  k') bCs, bool f g =<< flip unModel k)
+        [((Set.insert . Set.singleton) (False, CB k') aCs `disjoinConstraints`
+          (Set.insert . Set.singleton) (True,  CB k') bCs, bool f g =<< flip unModel k)
         | (aCs, f) <- a, (bCs, g) <- b, k <- newKey, let k' = Key' k]
 
-assert :: Applicative f => Constraint s -> SolverT s f ()
-assert c = (SolverT . pure) ((Set.singleton . Set.singleton) c, pure ())
+assert :: Applicative f => Bool -> Constraint s -> SolverT s f ()
+assert b c = (SolverT . pure) ((Set.singleton . Set.singleton) (b, c), pure ())
 
-type Constraints s = Set (Set (Constraint s))
+type Constraints s = Set (Set (Bool, Constraint s))
 
 disjoinConstraints :: Constraints s -> Constraints s -> Constraints s
 disjoinConstraints = (fmap . fmap) Set.fromList (liftA2 (<>) `on` toList)
 
 data Constraint s
-  = CB !Bool !(Key' s Bool)
-  | LEqN !(Key' s Natural) !(Key' s Natural)
+  = CB !(Key' s Bool)
+  | LessN !(Key' s Natural) !(Key' s Natural)
+  | EqualN !(Key' s Natural) !(Key' s Natural)
   deriving (Eq, Ord, Show)
 
 newtype Key' s a = Key' { unKey' :: Key s a }
