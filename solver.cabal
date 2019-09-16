@@ -6,7 +6,7 @@ license:             BSD3
 license-file:        LICENSE
 author:              M Farkas-Dyck
 maintainer:          strake888@gmail.com
-copyright:           2019 M Farkas-Dyck
+copyright:           2019 Groq
 -- category:            
 build-type:          Simple
 extra-source-files:  README.md
